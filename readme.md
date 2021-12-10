@@ -1,2 +1,3 @@
 todo:
-    * fix VMA dependency: remove redundand downloads and make separate cpp file
+    * add custom logging to vk_instance
+    * add proper support for sanitizers and warnings

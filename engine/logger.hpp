@@ -5,7 +5,11 @@
 
 namespace engine {
     
+    using logger_t = std::shared_ptr<spdlog::logger>;
+
     std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> get_default_sink();
 
-    std::shared_ptr<spdlog::logger> get_default_logger();
+    logger_t get_default_logger();
+
+    logger_t create_logger(const std::string& name);
 }

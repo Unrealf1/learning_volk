@@ -17,6 +17,7 @@ int main() {
     params.flags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN);
 
 	auto renderer = Renderer(engine::createWindow(params));
+    renderer.init();
     
     SDL_Event event;
 	bool should_quit = false;
