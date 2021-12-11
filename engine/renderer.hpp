@@ -32,10 +32,26 @@ namespace engine {
         std::vector<VkImage> m_swapchain_images;
         std::vector<VkImageView> m_swapchain_image_views;
 
+        VkQueue m_graphics_que;
+        uint32_t m_graphics_que_family;
+
+        // this should probably go somewhere else
+        VkCommandPool m_command_pool;
+        VkCommandBuffer m_command_buffer;
+        VkRenderPass m_render_pass;
+	    std::vector<VkFramebuffer> m_framebuffers;
+
+        VkSemaphore m_present_semaphore;
+        VkSemaphore m_render_semaphore;
+        VkFence m_render_fence;
+
+        uint64_t m_frame_number = 0;
+
         logger_t m_logger;
 
     private:
         std::optional<vkb::Instance> create_vulk_instance();
+        void prepare_commands();
     };
 
 }
