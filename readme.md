@@ -1,4 +1,5 @@
 guide: https://vkguide.dev/
+[current: 2.3]
 
 todo:
 
