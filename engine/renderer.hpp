@@ -52,6 +52,10 @@ namespace engine {
     private:
         std::optional<vkb::Instance> create_vulk_instance();
         void prepare_commands();
+        void prepare_pipelines();
+
+        bool load_shader_module(const char* filePath, VkShaderModule* outShaderModule);
+
     };
 
 }

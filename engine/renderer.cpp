@@ -4,6 +4,8 @@
 #include <SDL_vulkan.h>
 
 #include <optional>
+#include <fstream>
+#include <filesystem>
 
 
 namespace engine {
@@ -92,10 +94,12 @@ namespace engine {
             m_surface 
         };
 
+        auto [window_width, window_height] = getWindowDimentions(m_window);
+
         vkb::Swapchain vkb_swapchain = swapchain_builder
             .use_default_format_selection()
             .set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
-            .set_desired_extent(200, 200) //FIXME
+            .set_desired_extent(window_width, window_height) 
             .build()
             .value();
 
@@ -112,6 +116,7 @@ namespace engine {
         ).value();
 
         prepare_commands();
+        prepare_pipelines();
 
         return true;
     }
@@ -136,7 +141,7 @@ namespace engine {
 
        	VkClearValue clearValue;
        	float flash = abs(sin(m_frame_number / 120.f));
-       	clearValue.color = { { 0.0f, 0.0f, 1.0f, 1.0f } };
+       	clearValue.color = { { 1.0f, flash, 0.0f, 1.0f } };
        
        	//start the main renderpass.
        	VkRenderPassBeginInfo rpInfo = {};
@@ -175,6 +180,7 @@ namespace engine {
        	present_info.pWaitSemaphores = &m_render_semaphore;
        	present_info.waitSemaphoreCount = 1;
        	present_info.pImageIndices = &swapchain_image_index;
+
        	check_vk(vkQueuePresentKHR(m_graphics_que, &present_info));
 
         ++m_frame_number;
@@ -251,14 +257,15 @@ namespace engine {
             &m_render_pass
         ));
 
+        auto [window_width, window_height] = getWindowDimentions(m_window);
         // create framebuffers
         VkFramebufferCreateInfo fb_info = {};
         fb_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         fb_info.pNext = nullptr;
         fb_info.renderPass = m_render_pass;
         fb_info.attachmentCount = 1;
-        fb_info.width = 200; //FIXME
-        fb_info.height = 200; //FIXME
+        fb_info.width = window_width; 
+        fb_info.height = window_height;
         fb_info.layers = 1;
         const uint32_t swapchain_imagecount = m_swapchain_images.size();
         m_framebuffers = std::vector<VkFramebuffer>(swapchain_imagecount);
@@ -283,6 +290,47 @@ namespace engine {
 
     }
 
+    void Renderer::prepare_pipelines() {
+        VkShaderModule triangleFragShader;
+        if (!load_shader_module("resources/shaders/frag.spv", &triangleFragShader)) {
+            m_logger->error("failed to load shader");
+        }
+
+        VkShaderModule triangleVertShader;
+        if (!load_shader_module("resources/shaders/vert.spv", &triangleVertShader)) {
+            m_logger->error("failed to load shader");
+        }
+    }
+
+
+    bool Renderer::load_shader_module(const char* filePath, VkShaderModule* outShaderModule) {
+        std::ifstream shader_file(filePath, std::ios::binary);
+
+        if (!shader_file.is_open()) {
+            return false;
+        }
+        auto filesize = std::filesystem::file_size(filePath);
+        std::vector<uint32_t> shader_code(filesize / sizeof(uint32_t));
+
+        m_logger->info("loading shader of size {}", filesize);
+        m_logger->info("code size is {}", shader_code.size());
+        shader_file.read(reinterpret_cast<char*>(shader_code.data()), filesize);
+
+        VkShaderModuleCreateInfo createInfo = {};
+        createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        createInfo.pNext = nullptr;
+
+        createInfo.codeSize = shader_code.size() * sizeof(uint32_t);
+        createInfo.pCode = shader_code.data();
+
+        //check that the creation goes well.
+        VkShaderModule shaderModule;
+        if (vkCreateShaderModule(m_device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+            return false;
+        }
+        *outShaderModule = shaderModule;
+        return true;
+    }
     
 }
 

@@ -23,5 +23,8 @@ namespace engine {
     using window_t = std::unique_ptr<SDL_Window, decltype(&destroySdlWindow)>;
 
     window_t createWindow(const WindowParams&);
+
+    // width, height
+    std::pair<int, int> getWindowDimentions(const window_t&);
 }
 

@@ -6,5 +6,6 @@ todo:
 
     * add proper support for sanitizers and warnings
 
-    * add window size information to renderer. Maybe ask SDL?
+    * fix validator warnings
 
+    * fix clear color not working

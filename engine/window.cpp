@@ -43,5 +43,14 @@ namespace engine {
 
         return window_t(raw, destroySdlWindow);
     }
+    
 
+    std::pair<int, int> getWindowDimentions(const window_t& window) {
+        int width;
+        int height;
+        
+        SDL_GetWindowSize(window.get(), &width, &height);
+
+        return { width, height };
+    }
 }
